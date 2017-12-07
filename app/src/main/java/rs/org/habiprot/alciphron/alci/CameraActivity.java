@@ -1,5 +1,6 @@
 package rs.org.habiprot.alciphron.alci;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
@@ -11,6 +12,9 @@ import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.media.Image;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -19,6 +23,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -28,6 +33,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -49,6 +56,8 @@ import static java.security.AccessController.getContext;
 
 public class CameraActivity extends AppCompatActivity {
 
+    LocationManager mLocationManager;
+    TextView tv5;
 
 
     ImageView imageView;
@@ -67,26 +76,51 @@ public class CameraActivity extends AppCompatActivity {
         imageView = (ImageView) findViewById(R.id.cameraImage);
 
 
-
-
-
         Intent cameraIntent = new Intent();
         cameraIntent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
 
 
-
-                //Uri outputUri=FileProvider.getUriForFile(getActivity().getApplicationContext(), AUTHORITY, imageFile);
-                //Uri pictureUri = Uri.fromFile(imageFile);
-              //  cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-
-
-                startActivityForResult(cameraIntent, CAMERA_REQUEST);
+        //Uri outputUri=FileProvider.getUriForFile(getActivity().getApplicationContext(), AUTHORITY, imageFile);
+        //Uri pictureUri = Uri.fromFile(imageFile);
+        //  cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
 
 
+        startActivityForResult(cameraIntent, CAMERA_REQUEST);
+
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        Location location = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+
+        if(location != null && location.getTime() > Calendar.getInstance().getTimeInMillis() - 2 * 60 * 1000) {
+            // Do something with the recent location fix
+            //  otherwise wait for the update below
+            tv5 = (TextView) findViewById(R.id.textView5);
+            tv5.setText("Lokacija je"+location.getLatitude() + location.getLongitude());
+        }
+        else {
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, (LocationListener) this);
+        }
 
 
 
+    }
 
+    public void onLocationChanged(Location location) {
+        if (location != null) {
+            Log.v("Location Changed", location.getLatitude() + " and " + location.getLongitude());
+            tv5.setText("Nova Lokacija je: "+location.getLatitude() + location.getLongitude());
+            mLocationManager.removeUpdates((LocationListener) this);
+        }
     }
 
 
@@ -143,6 +177,11 @@ public class CameraActivity extends AppCompatActivity {
         }
 
         else {
+
+
+
+            Toast.makeText(this, "Niste izvršili slikanje!", Toast.LENGTH_LONG).show();
+
 
             this.finish();
 
