@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Alciphron.iml" filepath="$PROJECT_DIR$/Alciphron.iml" />
+      <module fileurl="file://$PROJECT_DIR$/HWMonitor_x64.exe.iml" filepath="$PROJECT_DIR$/HWMonitor_x64.exe.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
