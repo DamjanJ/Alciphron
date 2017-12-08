@@ -69,6 +69,7 @@ public class GalleryActivityTwo extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_uploadgallerytwo);
+        getWindow().setBackgroundDrawableResource(R.drawable.smallbackgroundtexture) ;
 
 
         Intent i = new Intent(
