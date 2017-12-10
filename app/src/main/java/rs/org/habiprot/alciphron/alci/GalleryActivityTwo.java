@@ -50,14 +50,17 @@ import java.util.Date;
  */
 
 
-public class GalleryActivityTwo extends AppCompatActivity {
+public class GalleryActivityTwo extends AppCompatActivity implements LocationListener{
 
     private static int RESULT_LOAD_IMAGE = 1;
     private LocationListener mlocationListener;
     private LocationManager locationManager;
     private FloatingActionButton fab;
     private TextView tv;
+    private TextView tv2;
     private Location mlocation;
+    private TextView tv6;
+    //private TextView tv7;
 
     private int Zone = 0;
     private char Letter ;
@@ -69,7 +72,8 @@ public class GalleryActivityTwo extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_uploadgallerytwo);
-        getWindow().setBackgroundDrawableResource(R.drawable.smallbackgroundtexture) ;
+        // getWindow().setBackgroundDrawableResource(R.drawable.smallbackgroundtexture) ;
+
 
 
         Intent i = new Intent(
@@ -78,6 +82,7 @@ public class GalleryActivityTwo extends AppCompatActivity {
 
         startActivityForResult(i, RESULT_LOAD_IMAGE);
 
+
         LocationManager lm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
@@ -85,13 +90,13 @@ public class GalleryActivityTwo extends AppCompatActivity {
         }
         mlocation = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
-        tv = (TextView) findViewById(R.id.textView2);
+        tv2 = (TextView) findViewById(R.id.textView2);
 
         if (mlocation != null) {
-            tv.setText(demo(mlocation.getLatitude(), mlocation.getLongitude()));
+            tv2.setText(demo(mlocation.getLatitude(), mlocation.getLongitude()));
         }
         else {
-            tv.setText("Current Location: No Data");
+            tv2.setText("Current Location: No Data");
         }
 
        // tv.setText(demo(mlocation.getLatitude(),mlocation.getLongitude()));
@@ -104,12 +109,16 @@ public class GalleryActivityTwo extends AppCompatActivity {
         fab = (FloatingActionButton) findViewById(R.id.floatingActionButton);
 
 
+
         mlocationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
 
-                tv.setText(demo(mlocation.getLatitude(),mlocation.getLongitude()));
-                locationManager.removeUpdates(this);
+                // Backup location
+                if (location != null) {
+                    tv2.setText(demo(mlocation.getLatitude(), mlocation.getLongitude()));
+                    locationManager.removeUpdates(this);
+                }
 
 
             }
@@ -132,12 +141,59 @@ public class GalleryActivityTwo extends AppCompatActivity {
             }
         };
 
+        locationManager.requestLocationUpdates("gps", 5000, 0, mlocationListener);
         configure_button();
 
 
+        tv6 = (TextView) findViewById(R.id.textView6);
+
+        MyLocation myLocation = new MyLocation();
 
 
 
+        rs.org.habiprot.alciphron.alci.MyLocation.LocationResult locationResult = new rs.org.habiprot.alciphron.alci.MyLocation.LocationResult(){
+            @Override
+            public void gotLocation(Location location){
+                //Got the location!
+                if (location != null) {
+                    tv6.setText("MyLocation: " + location.getLatitude() + " " + location.getLongitude());
+                }
+                else {
+                    tv6.setText("Nepoznata Lokacija...");
+                }
+            }
+        };
+
+
+        if (locationResult!=null) {
+            myLocation.getLocation(this, locationResult);
+        }
+
+
+
+
+        // Acquire a reference to the system Location Manager
+        // Define a listener that responds to location updates
+        // Register the listener with the Location Manager to receive location updates - TEST
+
+        /*
+        tv7 = (TextView) findViewById(R.id.textView7);
+         LocationManager MylocationManager2 = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+         MylocationManager2.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, MylocationListener2);
+
+         LocationListener MylocationListener2 = new LocationListener() {
+            public void onLocationChanged(Location location) {
+                // Called when a new location is found by the network location provider.
+                tv7.setText("Network: " + location.getLatitude() + "\n" + location.getLongitude());
+            }
+
+            public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+            public void onProviderEnabled(String provider) {}
+
+            public void onProviderDisabled(String provider) {}
+        };
+        */
 
 /*
 
@@ -192,8 +248,8 @@ public class GalleryActivityTwo extends AppCompatActivity {
 
 
 
-            TextView textView = (TextView) findViewById(R.id.textView);
-            textView.setText(dateInt);
+            tv = (TextView) findViewById(R.id.textView);
+            tv.setText(dateInt);
             //textView.setText(picturePath.substring(picturePath.lastIndexOf("/" )+1,picturePath.lastIndexOf(".")));
 
 
@@ -262,6 +318,7 @@ public class GalleryActivityTwo extends AppCompatActivity {
         });
     }
 
+    // DUMMY PODATCI ZA
 
 
     private String demo(double Lat, double Lon)
@@ -330,7 +387,29 @@ public class GalleryActivityTwo extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onLocationChanged(Location location) {
+        if (location != null) {
+            tv6.setText("BIG LOC LISTENER " + location.getLatitude());
+        }
+        else {
+            tv6.setText("Big Loc Listener Warning!");
+        }
+    }
 
+    @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {
 
+    }
+
+    @Override
+    public void onProviderEnabled(String s) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String s) {
+
+    }
 }
 
