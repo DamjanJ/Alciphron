@@ -14,6 +14,7 @@ import android.widget.Button;
 
 import android.graphics.Bitmap;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
 
     Button button;
     MenuItem item;
-    static final int REQUEST_IMAGE_CAPTURE = 1;
     private Bitmap mImageBitmap;
     private ImageView mImageView;
     String mCurrentPhotoPath;
@@ -121,7 +121,9 @@ public class MainActivity extends AppCompatActivity {
 
         if (item.getItemId()== R.id.mLogOut) {
             Intent i = new Intent(getApplicationContext(),LoginActivity.class);
+
             startActivity(i);
+            this.finish();
 
         }
 
@@ -131,25 +133,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
-
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  // prefix
-                ".jpg",         // suffix
-                storageDir      // directory
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
-        return image;
-    }
 
 
 

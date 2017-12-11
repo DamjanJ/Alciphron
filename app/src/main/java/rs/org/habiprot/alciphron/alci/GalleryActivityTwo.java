@@ -57,11 +57,8 @@ public class GalleryActivityTwo extends AppCompatActivity implements LocationLis
     private LocationManager locationManager;
     private FloatingActionButton fab;
     private TextView tv;
-    private TextView tv2;
     private Location mlocation;
-    private TextView tv6;
     //private TextView tv7;
-
     private int Zone = 0;
     private char Letter ;
     private double Easting = 0;
@@ -73,6 +70,8 @@ public class GalleryActivityTwo extends AppCompatActivity implements LocationLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_uploadgallerytwo);
         // getWindow().setBackgroundDrawableResource(R.drawable.smallbackgroundtexture) ;
+
+        final TextView tv6 = (TextView) findViewById(R.id.textView6);
 
 
 
@@ -90,13 +89,12 @@ public class GalleryActivityTwo extends AppCompatActivity implements LocationLis
         }
         mlocation = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
-        tv2 = (TextView) findViewById(R.id.textView2);
 
         if (mlocation != null) {
-            tv2.setText(demo(mlocation.getLatitude(), mlocation.getLongitude()));
+            tv6.setText("Trenutna lokacija je:\n" +demo(mlocation.getLatitude(), mlocation.getLongitude()));
         }
         else {
-            tv2.setText("Current Location: No Data");
+            tv6.setText("Trenutna Lokacija:\nTraži se...");
         }
 
        // tv.setText(demo(mlocation.getLatitude(),mlocation.getLongitude()));
@@ -116,7 +114,7 @@ public class GalleryActivityTwo extends AppCompatActivity implements LocationLis
 
                 // Backup location
                 if (location != null) {
-                    tv2.setText(demo(mlocation.getLatitude(), mlocation.getLongitude()));
+                    tv6.setText("Trenutna lokacija je:\n" +demo(mlocation.getLatitude(), mlocation.getLongitude()));
                     locationManager.removeUpdates(this);
                 }
 
@@ -145,46 +143,52 @@ public class GalleryActivityTwo extends AppCompatActivity implements LocationLis
         configure_button();
 
 
-        tv6 = (TextView) findViewById(R.id.textView6);
-
-        MyLocation myLocation = new MyLocation();
 
 
+        /*
+        String s1 = "OOOO";
 
-        rs.org.habiprot.alciphron.alci.MyLocation.LocationResult locationResult = new rs.org.habiprot.alciphron.alci.MyLocation.LocationResult(){
+        MyLocation.LocationResult locationResult = new MyLocation.LocationResult(){
             @Override
             public void gotLocation(Location location){
                 //Got the location!
-                if (location != null) {
-                    tv6.setText("MyLocation: " + location.getLatitude() + " " + location.getLongitude());
+                if (location!=null) {
+                   // tv6.setText("Nova Lokacija je:\n" + demo(location.getLatitude(), location.getLongitude()));
+                    Log.i("TestTTTTTTTTT" + location.getLatitude(), "END");
                 }
                 else {
-                    tv6.setText("Nepoznata Lokacija...");
+                  //  tv6.setText("Nema Lokacije još uvek");
                 }
             }
         };
 
 
-        if (locationResult!=null) {
-            myLocation.getLocation(this, locationResult);
-        }
+
+        MyLocation myLocation = new MyLocation();
+        myLocation.getLocation(this, locationResult);
 
 
 
+        //MyLocation myLocation = new MyLocation();
+        //myLocation.getLocation(this, locationResult);
 
         // Acquire a reference to the system Location Manager
         // Define a listener that responds to location updates
         // Register the listener with the Location Manager to receive location updates - TEST
 
-        /*
-        tv7 = (TextView) findViewById(R.id.textView7);
-         LocationManager MylocationManager2 = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-         MylocationManager2.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, MylocationListener2);
+
+        tv7 = (TextView) findViewById(R.id.textView7);*/
+         /*
 
          LocationListener MylocationListener2 = new LocationListener() {
             public void onLocationChanged(Location location) {
                 // Called when a new location is found by the network location provider.
-                tv7.setText("Network: " + location.getLatitude() + "\n" + location.getLongitude());
+                if (location != null ) {
+                    tv6.setText("Lokacija je\n" + demo(location.getLatitude(),location.getLongitude()));
+                }
+                else {
+                    tv6.setText("Lokacija se traži");
+                }
             }
 
             public void onStatusChanged(String provider, int status, Bundle extras) {}
@@ -193,26 +197,10 @@ public class GalleryActivityTwo extends AppCompatActivity implements LocationLis
 
             public void onProviderDisabled(String provider) {}
         };
+        LocationManager MylocationManager2 = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        MylocationManager2.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, MylocationListener2);
         */
 
-/*
-
-
-
-        // getLocationButton is the name of your button.  Not the best name, I know.
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // instantiate the location manager, note you will need to request permissions in your manifest
-                LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                // get the last know location from your location manager.
-                Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                // now get the lat/lon from the location and do something with it.
-
-                Log.i("duzina "+location.getLatitude(), "sirina "  + location.getLongitude());
-            }
-        });
-*/
 }
 
 
@@ -249,7 +237,7 @@ public class GalleryActivityTwo extends AppCompatActivity implements LocationLis
 
 
             tv = (TextView) findViewById(R.id.textView);
-            tv.setText(dateInt);
+            tv.setText("Datum i Vreme:\n"+dateInt);
             //textView.setText(picturePath.substring(picturePath.lastIndexOf("/" )+1,picturePath.lastIndexOf(".")));
 
 
@@ -284,11 +272,13 @@ public class GalleryActivityTwo extends AppCompatActivity implements LocationLis
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
         switch (requestCode){
             case 10:
                 configure_button();
                 break;
             default:
+                this.finish();
                 break;
         }
     }
@@ -299,6 +289,7 @@ public class GalleryActivityTwo extends AppCompatActivity implements LocationLis
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.INTERNET}
                         ,10);
+
             }
             return;
         }
@@ -390,10 +381,10 @@ public class GalleryActivityTwo extends AppCompatActivity implements LocationLis
     @Override
     public void onLocationChanged(Location location) {
         if (location != null) {
-            tv6.setText("BIG LOC LISTENER " + location.getLatitude());
+            //tv6.setText("BIG LOC LISTENER " + location.getLatitude());
         }
         else {
-            tv6.setText("Big Loc Listener Warning!");
+            //tv6.setText("Big Loc Listener Warning!");
         }
     }
 

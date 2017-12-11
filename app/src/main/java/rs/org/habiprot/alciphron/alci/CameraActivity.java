@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
@@ -92,6 +93,14 @@ public class CameraActivity extends AppCompatActivity {
         cameraIntent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
         tv5 = (TextView) findViewById(R.id.textView5);
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.INTERNET}
+                        ,10);
+            }
+            return;
+        }
+
 
         //Uri outputUri=FileProvider.getUriForFile(getActivity().getApplicationContext(), AUTHORITY, imageFile);
         //Uri pictureUri = Uri.fromFile(imageFile);
@@ -109,13 +118,11 @@ public class CameraActivity extends AppCompatActivity {
         }
         mlocation = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
-
-
         if (mlocation != null) {
-            tv5.setText(demo(mlocation.getLatitude(), mlocation.getLongitude()));
+            tv5.setText("Trenutna lokacija je:\n" +demo(mlocation.getLatitude(), mlocation.getLongitude()));
         }
         else {
-            tv5.setText("Current Location: No Data");
+            tv5.setText("Trenutna Lokacija:\nTraži se...");
         }
 
         // tv.setText(demo(mlocation.getLatitude(),mlocation.getLongitude()));
@@ -128,12 +135,16 @@ public class CameraActivity extends AppCompatActivity {
         fab = (FloatingActionButton) findViewById(R.id.floatingActionButton);
 
 
+
         mlocationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
 
-                tv5.setText(demo(mlocation.getLatitude(),mlocation.getLongitude()));
-                locationManager.removeUpdates(this);
+                // Backup location
+                if (location != null) {
+                    tv5.setText("Trenutna lokacija je:\n" +demo(mlocation.getLatitude(), mlocation.getLongitude()));
+                    locationManager.removeUpdates(this);
+                }
 
 
             }
@@ -155,6 +166,12 @@ public class CameraActivity extends AppCompatActivity {
                 startActivity(mi);
             }
         };
+
+        locationManager.requestLocationUpdates("gps", 5000, 0, mlocationListener);
+        configure_button();
+
+
+
 
         configure_button();
 
@@ -215,7 +232,7 @@ public class CameraActivity extends AppCompatActivity {
 
 
             TextView textView = (TextView) findViewById(R.id.textView);
-            textView.setText(dateInt);
+            textView.setText("Datum i Vreme:\n"+dateInt);
 
 
 
@@ -233,6 +250,18 @@ public class CameraActivity extends AppCompatActivity {
 
             this.finish();
 
+        }
+    }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        switch (requestCode){
+            case 10:
+                configure_button();
+                break;
+            default:
+                this.finish();
+                break;
         }
     }
 
