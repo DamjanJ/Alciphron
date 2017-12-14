@@ -48,10 +48,6 @@ public class MainActivity extends AppCompatActivity {
 
         button=(Button)findViewById(R.id.btnPhoto);
         button.setOnClickListener(new View.OnClickListener() {
-
-
-
-
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub

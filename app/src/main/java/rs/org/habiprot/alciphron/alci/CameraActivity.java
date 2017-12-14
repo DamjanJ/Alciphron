@@ -49,7 +49,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
+import static android.os.Environment.getExternalStoragePublicDirectory;
 import static java.security.AccessController.getContext;
 
 /**
@@ -65,11 +67,14 @@ public class CameraActivity extends AppCompatActivity {
     private FloatingActionButton fab;
     private LocationListener mlocationListener;
     private LocationManager locationManager;
+    public String mCurrentPhotoPath2;
 
     private int Zone = 0;
     private char Letter ;
     private double Easting = 0;
     private double Northing = 0;
+    private File photoFile;
+    private Uri photoURI;
 
 
     ImageView imageView;
@@ -88,9 +93,6 @@ public class CameraActivity extends AppCompatActivity {
         imageView = (ImageView) findViewById(R.id.cameraImage);
         fab = (FloatingActionButton) findViewById(R.id.floatingActionButton);
 
-
-        Intent cameraIntent = new Intent();
-        cameraIntent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
         tv5 = (TextView) findViewById(R.id.textView5);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -107,7 +109,10 @@ public class CameraActivity extends AppCompatActivity {
         //  cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
 
 
-        startActivityForResult(cameraIntent, CAMERA_REQUEST);
+
+
+
+        // End of Camera Request
 
 
 
@@ -175,10 +180,90 @@ public class CameraActivity extends AppCompatActivity {
 
         configure_button();
 
+        dispatchTakePictureIntent();
+
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+
+
+
+
+
+
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+             photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                photoURI = FileProvider.getUriForFile(this,
+                        "rs.org.fileprovider",
+                        photoFile);
+
+
+                List<ResolveInfo> resInfoList = this.getPackageManager().queryIntentActivities(takePictureIntent, PackageManager.MATCH_DEFAULT_ONLY);
+                for (ResolveInfo resolveInfo : resInfoList) {
+                    String packageName = resolveInfo.activityInfo.packageName;
+                    this.grantUriPermission(packageName, photoURI, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                }
+
+
+
+
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, CAMERA_REQUEST);
+            }
+        }
+    }
+
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        //File storageDir = getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        String picturename = getPictureName();
+        /* 14.12.2017 Start: Testing */
+        File image2 = new File (storageDir,picturename);
+
+
+        mCurrentPhotoPath2 = image2.getAbsolutePath();
+          // 14.12.2017 END: Testing
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+
+
+    private void galleryAddPic() {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(mCurrentPhotoPath);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        this.sendBroadcast(mediaScanIntent);
 
 
 
     }
+
+
 
     public void onLocationChanged(Location location) {
         if (location != null) {
@@ -203,7 +288,8 @@ public class CameraActivity extends AppCompatActivity {
 
 
         if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
-
+            // Old Code with Temp file creation
+            /*
             File pictureDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
             String pictureName = getPictureName();
             File imageFile = new File(pictureDirectory, pictureName);
@@ -211,17 +297,31 @@ public class CameraActivity extends AppCompatActivity {
             // String authorities = getApplicationContext().getPackageName() + ".fileprovider";
             Uri imageUri = FileProvider.getUriForFile(CameraActivity.this, "rs.org.fileprovider", imageFile);
 
-            mCurrentPhotoPath = imageFile.getAbsolutePath();
+
+            mCurrentPhotoPath = photoFile.getAbsolutePath();
+            mCurrentPhotoPath2 = imageFile.getAbsolutePath();
 
 
             Log.i("OBAVESTENJE", mCurrentPhotoPath);
             Intent mediaScanIntent = new Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE");
 
             this.sendBroadcast(mediaScanIntent);
+            /*
 
+            // 13.Dec.2017 Start: Test Broadcast
+
+            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+
+            //set uri to scan
+            mediaScanIntent.setData(data.getData());
+            //start media scanner to discover new photo and display it in gallery
+            this.sendBroadcast(mediaScanIntent);
+
+*/
             ImageView cameraImage = (ImageView) findViewById(R.id.cameraImage);
-            cameraImage.setImageURI(data.getData());
+            cameraImage.setImageURI(photoURI);
 
+            // 13.Dec. 2017 End: Test Broadcast
 
 
             Date date = new Date();
@@ -233,6 +333,19 @@ public class CameraActivity extends AppCompatActivity {
 
             TextView textView = (TextView) findViewById(R.id.textView);
             textView.setText("Datum i Vreme:\n"+dateInt);
+
+           galleryAddPic();
+
+            Bitmap bitmap;
+            BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
+            bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath,
+                    bitmapOptions);
+
+            MediaStore.Images.Media.insertImage(getContentResolver(),
+                    bitmap,
+                    String.valueOf(System.currentTimeMillis()),
+                    "Description");
+            saveImage(bitmap);
 
 
 
@@ -251,6 +364,46 @@ public class CameraActivity extends AppCompatActivity {
             this.finish();
 
         }
+    }
+
+    private void saveImage(Bitmap finalBitmap) {
+        String root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString();
+        System.out.println(root +" Root value in saveImage Function");
+        File myDir = new File(root + "/folder_name");
+
+        if (!myDir.exists()) {
+            myDir.mkdirs();
+        }
+
+        Random generator = new Random();
+        int n = 10000;
+        n = generator.nextInt(n);
+        String iname = "Image-" + n + ".jpg";
+        File file = new File(myDir, iname);
+        if (file.exists())
+            file.delete();
+        try {
+            FileOutputStream out = new FileOutputStream(file);
+            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            out.flush();
+            out.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Tell the media scanner about the new file so that it is
+        // immediately available to the user.
+        MediaScannerConnection.scanFile(this, new String[] { file.toString() }, null,
+                new MediaScannerConnection.OnScanCompletedListener() {
+                    public void onScanCompleted(String path, Uri uri) {
+                        Log.i("ExternalStorage", "Scanned " + path + ":");
+                        Log.i("ExternalStorage", "-> uri=" + uri);
+                    }
+                });
+
+        String Image_path = Environment.getExternalStorageDirectory()+ "/Pictures/folder_name/"+iname;
+
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

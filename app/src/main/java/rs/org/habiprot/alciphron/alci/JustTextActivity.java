@@ -188,8 +188,6 @@ public class JustTextActivity extends AppCompatActivity implements DatePickerDia
             public void onFocusChange(View view, boolean hasFocus) {
                 if (hasFocus) {
                     getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-                } else {
-                    getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED);
                 }
             }
         });

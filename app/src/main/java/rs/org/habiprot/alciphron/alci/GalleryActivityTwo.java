@@ -145,8 +145,7 @@ public class GalleryActivityTwo extends AppCompatActivity implements LocationLis
 
 
 
-        /*
-        String s1 = "OOOO";
+
 
         MyLocation.LocationResult locationResult = new MyLocation.LocationResult(){
             @Override
@@ -161,7 +160,7 @@ public class GalleryActivityTwo extends AppCompatActivity implements LocationLis
                 }
             }
         };
-
+        /*
 
 
         MyLocation myLocation = new MyLocation();
@@ -169,16 +168,13 @@ public class GalleryActivityTwo extends AppCompatActivity implements LocationLis
 
 
 
-        //MyLocation myLocation = new MyLocation();
-        //myLocation.getLocation(this, locationResult);
-
         // Acquire a reference to the system Location Manager
         // Define a listener that responds to location updates
         // Register the listener with the Location Manager to receive location updates - TEST
 
 
-        tv7 = (TextView) findViewById(R.id.textView7);*/
-         /*
+        //tv7 = (TextView) findViewById(R.id.textView7);
+
 
          LocationListener MylocationListener2 = new LocationListener() {
             public void onLocationChanged(Location location) {
@@ -199,8 +195,8 @@ public class GalleryActivityTwo extends AppCompatActivity implements LocationLis
         };
         LocationManager MylocationManager2 = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         MylocationManager2.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, MylocationListener2);
-        */
 
+        */
 }
 
 
